@@ -1,0 +1,179 @@
+# traciium format — TIM agent transcripts (trace.jsonl / *.jsonl transcripts)
+#
+# These are event-sourced agent runs with a `t` discriminator. Tool calls,
+# LLM turns, instrument bus traffic and terminal state are separate records
+# joined by timestamps / call_id.
+
+trace:
+  type_field: t
+  timestamp_field: ts
+  sequence_field: sequence
+  run_field: run_id
+
+events:
+  llm_request:
+    label: LLM turn
+    icon: "⟳"
+    tone: violet
+    slim: true
+    open: false
+    badges: []
+    body:
+      messages: messages
+      tools: json
+
+  llm_response:
+    label: Assistant
+    icon: "◆"
+    tone: emerald
+    open: true
+    title_from: provider_model
+    badges: [latency_ms]
+    body:
+      content: markdown
+      reasoning_content: markdown
+      tool_calls: tool_calls_brief
+
+  tool_call:
+    label: Tool call
+    icon: "▶"
+    tone: sky
+    open: true
+    title_from: name
+    badges: []
+    body:
+      arguments: tool_args
+
+  tool_result:
+    label: Tool result
+    icon: "◀"
+    tone: slate
+    open: false
+    badges: [duration_ms, exit_code, timed_out]
+    body:
+      stdout: output
+      stderr: output
+      reason: text
+
+  instrument_action:
+    label: Instrument
+    icon: "⎋"
+    tone: cyan
+    open: false
+    title_from: cmd
+    compact: false
+    badges: []
+    body:
+      shield: kv
+      native: kv
+
+  progress:
+    label: Progress
+    icon: "…"
+    tone: amber
+    compact: true
+    title_from: event
+
+  finish:
+    label: Finish
+    icon: "✓"
+    tone: lime
+    open: true
+    badges: []
+    body:
+      summary: markdown
+      artifacts: list
+
+  terminal:
+    label: Terminal
+    icon: "■"
+    tone: slate
+    open: true
+    badges: []
+    body:
+      terminal_state: text
+      terminal_category: text
+      success: text
+
+defaults:
+  ignore:
+    - schema_version
+    - monotonic_ns
+    - event_id
+    - block_id
+    - provider_response_id
+    - response_fingerprint
+    - output_limit_bytes
+    - stdout_bytes
+    - stderr_bytes
+    - stdout_truncated
+    - stderr_truncated
+    - propagated
+    - tool_choice
+    - run_id
+    - sequence
+    - ts
+    - ts_wall_utc
+    - retry_count
+    - usage
+    - reasoning_content_chars
+    - attempts
+    - request_controls
+  open: false
+  max_text: 20000
+  header_fields: [origin, substrate]
+
+# flat table view (quick scanning of the whole run)
+table:
+  columns:
+    - sequence
+    - t
+    - ts
+    - origin
+    - name
+    - exit_code
+    - duration_ms
+    - ok
+    - terminal_state
+    - success
+  max_cell: 120
+
+# time accounting: which millisecond fields count as busy spans
+timeline:
+  llm_response: latency_ms
+  tool_result: duration_ms
+
+value_styles:
+  success:
+    "true": { tone: emerald, label: "PASS" }
+    "false": { tone: red, label: "FAIL" }
+  ok:
+    "true": { tone: emerald }
+    "false": { tone: red, label: "ERROR" }
+  timed_out:
+    "true": { tone: red, label: "TIMED OUT" }
+  terminal_state:
+    harness_censored: { tone: amber }
+    safety_abort: { tone: red }
+    completed: { tone: emerald }
+  shield.decision:
+    blocked: { tone: red, label: "shield blocked" }
+
+conditional_styles:
+  - when: { t: terminal, success: false }
+    style: { tone: red, weight: bold }
+  - when: { t: terminal, success: true }
+    style: { tone: emerald, weight: bold }
+  - when: { t: tool_result, ok: false }
+    style: { tone: red }
+  - when: { t: tool_result, timed_out: true }
+    style: { tone: red, weight: bold }
+  - when: { t: instrument_action, shield: { decision: blocked } }
+    style: { tone: red }
+
+# how to decide the outcome chip for a run: the LAST event matching
+# these field values wins, and `field` on it holds the boolean result.
+outcome:
+  when:
+    t: terminal
+  field: success

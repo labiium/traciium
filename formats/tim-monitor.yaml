@@ -1,0 +1,82 @@
+# traciium format — TIM monitor / audit trails (monitor.jsonl, audit.jsonl)
+#
+# Flat audit records using an `event` discriminator, one line per audited
+# run. Best read in the table view; critical stops get loud row styling.
+
+trace:
+  type_field: event
+  timestamp_field: ts
+  run_field: run_id
+
+events:
+  run_audited:
+    label: Run audited
+    icon: "▶"
+    tone: violet
+    open: true
+    badges: [planned_order, lane]
+    body:
+      model_id: text
+      verdict: text
+      success: text
+      critical: list
+      suspicious: list
+
+  critical_stop:
+    label: Critical stop
+    icon: "⏹"
+    tone: red
+    open: true
+    weight: bold
+    badges: []
+    body:
+      reason: json
+      pids: list
+
+defaults:
+  ignore: []
+  open: false
+  max_text: 20000
+  header_fields: [model_id, lane]
+
+table:
+  columns:
+    - ts
+    - event
+    - run_id
+    - model_id
+    - lane
+    - success
+    - verdict
+    - critical
+    - suspicious
+  labels:
+    run_id: run
+  max_cell: 90
+
+value_styles:
+  success:
+    "true": { tone: emerald, label: "PASS" }
+    "false": { tone: red, label: "FAIL" }
+  verdict:
+    review: { tone: amber }
+    critical_stop: { tone: red }
+    pass: { tone: emerald }
+  event:
+    run_audited: { tone: violet }
+    critical_stop: { tone: red, prefix: "⏹ " }
+  critical: {}
+  suspicious: {}
+
+conditional_styles:
+  - when: { event: critical_stop }
+    style: { tone: red, weight: bold }
+  - when: { success: false }
+    style: { tone: rose }
+  - when: { success: true }
+    style: { tone: emerald }
+
+outcome:
+  when:
+    event: run_audited
+  field: success

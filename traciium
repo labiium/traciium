@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# traciium launcher — execs the compiled binary, building it if missing.
+set -euo pipefail
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+BIN=""
+for cand in "$DIR/target/release/traciium" "$DIR/target/debug/traciium"; do
+  [ -x "$cand" ] && BIN="$cand" && break
+done
+if [ -z "$BIN" ]; then
+  echo "traciium: building (first run only)…" >&2
+  (cd "$DIR" && cargo build --release --quiet)
+  BIN="$DIR/target/release/traciium"
+fi
+exec "$BIN" "$@"

@@ -1,0 +1,5 @@
+{"t":"run_started","ts":"2026-01-01T12:00:00Z","run_id":"demo-run-001","agent":"example-agent"}
+{"t":"assistant","ts":"2026-01-01T12:00:01Z","run_id":"demo-run-001","content":"I will inspect the input and summarize the result."}
+{"t":"tool_call","ts":"2026-01-01T12:00:02Z","run_id":"demo-run-001","name":"read_file","arguments":{"path":"input.txt"}}
+{"t":"tool_result","ts":"2026-01-01T12:00:03Z","run_id":"demo-run-001","ok":true,"output":"example input\n"}
+{"t":"terminal","ts":"2026-01-01T12:00:04Z","run_id":"demo-run-001","success":true,"summary":"Demo completed successfully"}

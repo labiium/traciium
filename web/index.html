@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>traciium — trace viewer</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<div id="app">
+  <aside id="sidebar">
+    <div class="brand">
+      <h1>traciium</h1>
+      <div class="brand-subtitle">trace audit</div>
+      <div class="fmt" id="fmt-path" title="">…</div>
+    </div>
+    <div id="filelist"></div>
+  </aside>
+  <main id="main">
+    <header id="runhead">
+      <p class="run-id" id="run-id">select a trace</p>
+      <div class="chips" id="run-chips"></div>
+    </header>
+    <div id="timeline-wrap">
+      <div id="timeline"></div>
+    </div>
+    <div id="toolbar">
+      <span class="toolbar-label">Events</span>
+      <input id="search" type="search" placeholder="filter events… (text)" autocomplete="off">
+      <div class="view-tabs">
+        <button id="tab-stream" class="active">stream</button>
+        <button id="tab-table">table</button>
+      </div>
+      <div class="type-filters" id="type-filters"></div>
+      <span id="match-count"></span>
+    </div>
+    <div id="content">
+      <div id="stream" tabindex="-1"></div>
+      <div id="tablewrap" style="display:none"></div>
+    </div>
+  </main>
+</div>
+<div id="keyboard-help" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="keyboard-help-title">
+  <div class="help-card">
+    <h2 id="keyboard-help-title">Keyboard shortcuts</h2>
+    <dl>
+      <dt>j / k</dt><dd>next / previous item</dd>
+      <dt>h / l</dt><dd>focus runs / events</dd>
+      <dt>Enter</dt><dd>open selected run or event</dd>
+      <dt>g g / Home / End</dt><dd>first / last item</dd>
+      <dt>Ctrl-[ / Ctrl-]</dt><dd>previous / next run</dd>
+      <dt>PageUp / PageDown</dt><dd>move by a page</dd>
+      <dt>t</dt><dd>toggle stream / table view</dd>
+      <dt>/</dt><dd>focus event search</dd>
+      <dt>n / N</dt><dd>next / previous search match</dd>
+      <dt>b</dt><dd>toggle sidebar</dd>
+      <dt>r</dt><dd>reload selected trace</dd>
+      <dt>?</dt><dd>show this help</dd>
+      <dt>Esc</dt><dd>close help or clear search</dd>
+    </dl>
+    <button id="close-help" type="button">close</button>
+  </div>
+</div>
+<script src="/app.js"></script>
+</body>
+</html>

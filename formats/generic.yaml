@@ -1,0 +1,33 @@
+# traciium format — generic fallback
+#
+# Works on any JSONL without knowing the schema: every distinct value of
+# `t` (or `event`) gets a stable colour from the palette, and bodies render
+# whatever fields are present. Use this as a starting point, then copy and
+# specialise per schema.
+
+trace:
+  type_field: t
+  timestamp_field: ts
+  run_field: run_id
+
+# no per-event config -> palette defaults + generic field rendering
+
+defaults:
+  ignore:
+    - schema_version
+    - monotonic_ns
+    - event_id
+    - block_id
+  open: false
+  max_text: 20000
+  header_fields: []
+
+table:
+  columns: []   # auto-infer columns from the data
+  max_cell: 140
+
+conditional_styles:
+  - when: { success: false }
+    style: { tone: red }
+  - when: { success: true }
+    style: { tone: emerald }

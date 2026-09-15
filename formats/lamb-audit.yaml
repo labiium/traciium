@@ -1,0 +1,112 @@
+# traciium format — LAMB simulator bus audit (campaign-logs/*/simulator-*/audit.jsonl)
+#
+# Every record is an HTTP call into the simulated instrument bus. There is no
+# explicit event type, so `endpoint` doubles as the discriminator: each route
+# gets its own tone, table column values and type filters.
+
+trace:
+  type_field: endpoint
+  timestamp_field: timestamp_unix_ms   # auto-detected as unix milliseconds
+  run_field: run_id
+
+events:
+  /instrument/write:
+    label: bus write
+    icon: "✎"
+    tone: orange
+    open: false
+    title_from: resource
+    badges: []
+    body:
+      model_name: text
+      request_body: json
+
+  /instrument/query:
+    label: bus read
+    icon: "?"
+    tone: cyan
+    open: false
+    title_from: resource
+    compact: true
+    badges: []
+
+  /instrument/query_raw:
+    label: raw read
+    icon: "?"
+    tone: blue
+    open: false
+    title_from: resource
+    compact: true
+    badges: []
+
+  /instrument/close:
+    label: bus close
+    icon: "⏏"
+    tone: rose
+    open: false
+    compact: true
+    badges: []
+
+  /add:
+    label: register
+    icon: "＋"
+    tone: lime
+    open: false
+    badges: []
+
+  /episode/configure:
+    label: episode configure
+    icon: "⚙"
+    tone: violet
+    open: true
+    badges: []
+    body:
+      model_name: text
+      request_body: json
+
+defaults:
+  ignore:
+    - audit_schema_version
+    - previous_record_hash
+    - record_hash
+    - root_hash
+    - scenario_sha256
+    - implementation_sha256
+    - stream_id
+    - audit_index
+    - run_id
+    - timestamp_unix_ms
+  open: false
+  max_text: 20000
+  header_fields: [status_code]
+
+# note: header_fields shows status chips on every card; per-event `badges`
+# add more. value_styles colours them green/red by HTTP code.
+
+table:
+  columns:
+    - timestamp_unix_ms
+    - endpoint
+    - resource
+    - status_code
+    - model_name
+  labels:
+    timestamp_unix_ms: time
+  max_cell: 90
+
+value_styles:
+  status_code:
+    "200": { tone: emerald }
+    "400": { tone: red }
+    "500": { tone: red }
+
+conditional_styles:
+  - when: { status_code: 500 }
+    style: { tone: red, weight: bold }
+  - when: { status_code: 400 }
+    style: { tone: red }
+
+# no outcome spec: the simulator log has no per-run pass/fail notion
+outcome:
+  when: {}
+  field: null
